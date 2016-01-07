@@ -4,6 +4,8 @@ function -h {
 cat <<USAGE
  USAGE: mesosflexinstall (--rel <mesos-version>)?
                          (--slave-hostname <SLAVE_HOSTNAME>)?
+                         (--slave-cpus <SLAVE_CPUS>)?
+                         (--slave-mem <SLAVE_MEM>)?
 
   Install and configure Mesos with Zookeeper support.
 
@@ -13,8 +15,15 @@ USAGE
 
 function main {
   options "$@"
+  global
   install_mesos
   configure_slave
+}
+
+function reconfigure_slave {
+    options "$@"
+    global
+    configure_slave
 }
 
 function globals {
@@ -34,6 +43,8 @@ function options {
     case "$1" in
       --rel)            rel="$2"                 ; shift ;;
       --slave-hostname) slave_hostname="$2"      ; shift ;; # See: MESOS-825
+      --slave-cpus)     slave_cpus="$2"          ; shift ;;
+      --slave-mem)      slave_mem="$2"          ; shift ;;
       --*)              err "No such option: $1" ;;
     esac
     shift
@@ -51,10 +62,16 @@ function install_mesos {
 function configure_slave {
   if [[ ${slave_hostname+isset} ]]
   then
-    mkdir -p /etc/mesos-slave
+    mkdir -p /etc/mesos-slave/resources
     echo "$slave_hostname" > /etc/mesos-slave/hostname
     echo "docker,mesos" > /etc/mesos-slave/containerizers
     echo "5mins" > /etc/mesos-slave/executor_registration_timeout
+    if [[ ${slave_cpus+isset} ]]; then
+        echo "$slave_cpus" > /etc/mesos-slave/resources/cpus
+    fi
+    if [[ ${slave_mem+isset} ]]; then
+        echo "$slave_mem" > /etc/mesos-slave/resources/mem
+    fi
   fi
 }
 

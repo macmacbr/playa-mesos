@@ -4,5 +4,7 @@
     "base_url": "http://downloads.mesosphere.io/playa-mesos",
     "ip_address": "10.141.141.10",
     "vm_ram": "2048",
-    "vm_cpus": "2"
+    "vm_cpus": "2",
+    "slave_mem": "1499",
+    "slave_cpus": "2"
 }
